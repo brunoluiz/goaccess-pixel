@@ -1,0 +1,43 @@
+project_name: 'goaccess-pixel'
+
+builds:
+  - main: './cmd/goaccess-pixel/main.go'
+    goos: ['linux', 'darwin', 'windows']
+    goarch: ['386', 'amd64']
+    env:
+      - CGO_ENABLED=0
+
+changelog:
+  sort: 'asc'
+  filters:
+    exclude: ['^docs:', '^test:', 'Merge pull request', 'Merge branch']
+
+archives:
+  - format_overrides:
+    - goos: 'windows'
+      format: 'zip'
+    wrap_in_directory: true
+    files:
+      - README.md
+
+nfpms:
+  - homepage: 'https://github.com/brunoluiz/goaccess-pixel'
+    description: 'Goaccess pixel track route'
+    maintainer: 'Bruno Silva <contact@brunoluiz.net>'
+    formats: ['deb', 'rpm']
+    dependencies: ['git']
+
+dockers:
+  - image_templates:
+    - 'brunoluiz/goaccess-pixel:{{ .Version }}'
+    - 'brunoluiz/goaccess-pixel:{{ .Major }}.{{ .Minor }}'
+    - 'brunoluiz/goaccess-pixel:latest'
+    dockerfile: 'Dockerfile'
+
+brews:
+  - github:
+      owner: 'brunoluiz'
+      name: 'homebrew-tap'
+    folder: 'Formula'
+    homepage: 'https://github.com/brunoluiz/goaccess-pixel'
+    description: 'Goaccess pixel track route'
