@@ -1,0 +1,12 @@
+<html>
+<body>
+  <p>Check your dashboard now</p>
+  <script>
+    const path = "u=" + encodeURIComponent(window.location.pathname);
+    const referrer = document.referrer ? "&r=" + encodeURIComponent(document.referrer) : ""
+
+    const _pixel = new Image(1, 1);
+    _pixel.src = `http://localhost:5000/?${path}${referrer}`;
+  </script>
+</body>
+</html>

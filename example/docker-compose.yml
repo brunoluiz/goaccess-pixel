@@ -1,0 +1,49 @@
+version: "3.5"
+
+services:
+  goaccess:
+    image: allinurl/goaccess
+    ports:
+      - '7890:7890'
+    volumes:
+      - "./goaccess:/goaccess/data"
+      - "./public:/goaccess/html"
+      - "./logs:/logs"
+    command: 'goaccess --no-global-config --config-file=/goaccess/data/goaccess.conf'
+    links:
+      - goaccess-pixel
+
+  # localhost:5000 will register calls to the tracking pixel
+  goaccess-pixel:
+    image: brunoluiz/goaccess-pixel
+    ports:
+      - "5000:5000"
+    environment:
+      # This symbolic link is shared between two containers! Both need to map the logs to the same path!
+      - 'LOG_FILE=/logs/access.log'
+      - 'PORT=5000'
+    volumes:
+      - "./logs:/logs"
+
+  # localhost:5001 will render a page and register a navigation
+  app:
+    image: brunoluiz/pwa-server
+    ports:
+      - "5001:5001"
+    environment:
+      - 'DIR=/dist'
+      - 'ADDRESS=:5001'
+    volumes:
+      - "./app:/dist"
+
+
+  # localhost:5000 will show the dashboard
+  goaccess-dashboard:
+    image: brunoluiz/pwa-server
+    ports:
+      - "5002:5002"
+    environment:
+      - 'DIR=/dist'
+      - 'ADDRESS=:5002'
+    volumes:
+      - "./public:/dist"

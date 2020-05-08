@@ -18,6 +18,8 @@ Install it using one of the provided methods and use the following script on you
 
 Once you run `goaccess-pixel`, it will output all the requests in log files, following Apache combined format. These can be used together with Goaccess using `goaccess ./access.log --log-format COMBINED`. By default, all logs are purged after a week (please refer to the parameters section for more information).
 
+Have a look at `/example` to see a suggested config using `docker-compose`
+
 ## Install
 
 ### MacOS
