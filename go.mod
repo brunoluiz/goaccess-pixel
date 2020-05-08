@@ -14,4 +14,5 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/tebeka/strftime v0.1.4 // indirect
 	github.com/urfave/cli v1.22.4
+	github.com/urfave/cli/v2 v2.2.0
 )

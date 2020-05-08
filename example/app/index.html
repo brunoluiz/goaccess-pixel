@@ -1,12 +1,6 @@
 <html>
 <body>
   <p>Check your dashboard now</p>
-  <script>
-    const path = "u=" + encodeURIComponent(window.location.pathname);
-    const referrer = document.referrer ? "&r=" + encodeURIComponent(document.referrer) : ""
-
-    const _pixel = new Image(1, 1);
-    _pixel.src = `http://localhost:5000/?${path}${referrer}`;
-  </script>
+  <script src='http://localhost:80/goaccess-pixel.js'></script>
 </body>
 </html>

@@ -1,16 +1,18 @@
 package main
 
 import (
+	"html/template"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/brunoluiz/goaccess-pixel/middleware"
+	"github.com/brunoluiz/goaccess-pixel/tmpl"
 	"github.com/go-chi/chi"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 func main() {
@@ -18,45 +20,57 @@ func main() {
 		Usage: "Goaccess pixel route",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:   "port",
-				Usage:  "Server port",
-				Value:  "80",
-				EnvVar: "PORT",
+				Name:    "port",
+				Usage:   "Server port",
+				Value:   "80",
+				EnvVars: []string{"PORT"},
 			},
 			&cli.StringFlag{
-				Name:   "log-file",
-				Usage:  "Log file output",
-				Value:  "./access.log",
-				EnvVar: "LOG_FILE",
+				Name:     "host",
+				Usage:    "Application hostname (eg: https://pixel.example.com:3000/). Will be used on the script served on script-route",
+				EnvVars:  []string{"HOST"},
+				Required: true,
+			},
+			&cli.StringFlag{
+				Name:    "log-file",
+				Usage:   "Log file output",
+				Value:   "./access.log",
+				EnvVars: []string{"LOG_FILE"},
 			},
 			&cli.DurationFlag{
-				Name:   "log-max-age",
-				Usage:  "Log max age",
-				Value:  7 * 24 * time.Hour,
-				EnvVar: "LOG_MAX_AGE",
+				Name:    "log-max-age",
+				Usage:   "Log max age",
+				Value:   7 * 24 * time.Hour,
+				EnvVars: []string{"LOG_MAX_AGE"},
 			},
 			&cli.DurationFlag{
-				Name:   "log-rotation-time",
-				Usage:  "Time between each log rotation",
-				Value:  time.Hour,
-				EnvVar: "LOG_ROTATION_TIME",
+				Name:    "log-rotation-time",
+				Usage:   "Time between each log rotation",
+				Value:   time.Hour,
+				EnvVars: []string{"LOG_ROTATION_TIME"},
 			},
 			&cli.StringFlag{
-				Name:   "ready-route",
-				Usage:  "Ready probe route",
-				Value:  "/__/ready",
-				EnvVar: "READY_ROUTE",
+				Name:    "ready-route",
+				Usage:   "Ready probe route",
+				Value:   "/__/ready",
+				EnvVars: []string{"READY_ROUTE"},
 			},
 			&cli.StringFlag{
-				Name:   "metrics-route",
-				Usage:  "Metrics route",
-				Value:  "/__/metrics",
-				EnvVar: "METRICS_ROUTE",
+				Name:    "metrics-route",
+				Usage:   "Metrics route",
+				Value:   "/__/metrics",
+				EnvVars: []string{"METRICS_ROUTE"},
+			},
+			&cli.StringFlag{
+				Name:    "script-route",
+				Usage:   "Pixel script route",
+				Value:   "/goaccess-pixel.js",
+				EnvVars: []string{"METRICS_ROUTE"},
 			},
 			&cli.BoolFlag{
-				Name:   "debug",
-				Usage:  "Turn on debug mode",
-				EnvVar: "DEBUG",
+				Name:    "debug",
+				Usage:   "Turn on debug mode",
+				EnvVars: []string{"DEBUG"},
 			},
 		},
 		Action: serve,
@@ -86,9 +100,21 @@ func serve(c *cli.Context) error {
 	r.
 		With(middleware.Transform).
 		With(middleware.Log(logf)).
-		Get("/*", func(w http.ResponseWriter, r *http.Request) {
+		Get("/pixel.png", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
+	r.Get(c.String("script-route"), func(w http.ResponseWriter, r *http.Request) {
+		t, err := template.New("script").Parse(tmpl.ScriptTmpl)
+		if err != nil {
+			logrus.Error(err)
+		}
+
+		if err := t.Execute(w, tmpl.ScriptTmplSubs{
+			Hostname: c.String("host"),
+		}); err != nil {
+			logrus.Error(err)
+		}
+	})
 	r.Get(c.String("metrics-route"), promhttp.Handler().ServeHTTP)
 	r.Get(c.String("ready-route"), func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
