@@ -3,6 +3,7 @@ version: "3.5"
 services:
   goaccess:
     image: allinurl/goaccess
+    restart: unless-stopped
     ports:
       - '7890:7890'
     volumes:
@@ -16,6 +17,7 @@ services:
   # localhost:5000 will register calls to the tracking pixel
   goaccess-pixel:
     image: brunoluiz/goaccess-pixel
+    restart: unless-stopped
     ports:
       - "5000:5000"
     environment:
@@ -28,6 +30,7 @@ services:
   # localhost:5001 will render a page and register a navigation
   app:
     image: brunoluiz/pwa-server
+    restart: unless-stopped
     ports:
       - "5001:5001"
     environment:
@@ -40,6 +43,7 @@ services:
   # localhost:5000 will show the dashboard
   goaccess-dashboard:
     image: brunoluiz/pwa-server
+    restart: unless-stopped
     ports:
       - "5002:5002"
     environment:
