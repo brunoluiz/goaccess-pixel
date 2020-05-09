@@ -10,7 +10,10 @@ services:
       - "./goaccess:/goaccess/data"
       - "./public:/goaccess/html"
       - "./logs:/logs"
-    command: 'goaccess --no-global-config --config-file=/goaccess/data/goaccess.conf'
+    entrypoint: sh
+    tty: true
+    stdin_open: true
+    command: -c 'tail -fq /logs/access.log.* | goaccess --no-global-config --config-file=/goaccess/data/goaccess.conf -'
     links:
       - goaccess-pixel
 
