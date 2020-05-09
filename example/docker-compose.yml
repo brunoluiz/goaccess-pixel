@@ -3,19 +3,24 @@ version: "3.5"
 services:
   goaccess:
     image: allinurl/goaccess
+    restart: unless-stopped
     ports:
       - '7890:7890'
     volumes:
       - "./goaccess:/goaccess/data"
       - "./public:/goaccess/html"
       - "./logs:/logs"
-    command: 'goaccess --no-global-config --config-file=/goaccess/data/goaccess.conf'
+    entrypoint: sh
+    tty: true
+    stdin_open: true
+    command: -c 'tail -fq /logs/access.log.* | goaccess --no-global-config --config-file=/goaccess/data/goaccess.conf -'
     links:
       - goaccess-pixel
 
   # localhost:5000 will register calls to the tracking pixel
   goaccess-pixel:
     image: brunoluiz/goaccess-pixel
+    restart: unless-stopped
     ports:
       - "5000:5000"
     environment:
@@ -28,6 +33,7 @@ services:
   # localhost:5001 will render a page and register a navigation
   app:
     image: brunoluiz/pwa-server
+    restart: unless-stopped
     ports:
       - "5001:5001"
     environment:
@@ -40,6 +46,7 @@ services:
   # localhost:5000 will show the dashboard
   goaccess-dashboard:
     image: brunoluiz/pwa-server
+    restart: unless-stopped
     ports:
       - "5002:5002"
     environment:
