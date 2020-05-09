@@ -38,7 +38,7 @@ func main() {
 			&cli.DurationFlag{
 				Name:   "log-rotation-time",
 				Usage:  "Time between each log rotation",
-				Value:  time.Hour,
+				Value:  24 * time.Hour,
 				EnvVar: "LOG_ROTATION_TIME",
 			},
 			&cli.StringFlag{
@@ -78,7 +78,7 @@ func serve(c *cli.Context) error {
 		c.String("log-file")+".%Y%m%d%H%M",
 		rotatelogs.WithLinkName(c.String("log-file")),
 		rotatelogs.WithMaxAge(c.Duration("log-max-age")),
-		rotatelogs.WithRotationTime(time.Minute),
+		rotatelogs.WithRotationTime(c.Duration("log-rotation-time")),
 	)
 	if err != nil {
 		return err
